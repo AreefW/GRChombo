@@ -1,7 +1,7 @@
 #!/bin/bash -l
 
 #! How many nodes
-#SBATCH --nodes 1
+#SBATCH --nodes 2
 ### NB cosma8 has 128 cores per node so product of these = 128
 #SBATCH --ntasks-per-node=64 ## Total tasks will be this * number of nodes
 #SBATCH --cpus-per-task=2 ## Equal to number of OMP threads per task (set below)
@@ -12,7 +12,7 @@
 #SBATCH -p cosma8
 #SBATCH -A dp092
 #SBATCH --exclusive
-#SBATCH -t 1:00:00
+#SBATCH -t 01:00:00
 #SBATCH --mail-type=NONE                          # notifications for job done & fail
 #SBATCH --mail-user=a.waeming@qmul.ac.uk
 

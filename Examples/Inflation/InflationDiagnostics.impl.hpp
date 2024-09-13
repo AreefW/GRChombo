@@ -12,26 +12,13 @@
 #include "DimensionDefinitions.hpp"
 
 template <class matter_t>
-InflationDiagnostics<matter_t>::InflationDiagnostics(
-    const matter_t a_matter, double dx, double G_Newton, int a_c_Ham,
-    const Interval &a_c_Moms, int a_c_Ham_abs_terms /* defaulted*/,
-    const Interval &a_c_Moms_abs_terms /*defaulted*/)
-    : MatterConstraints<matter_t>(a_matter, dx, G_Newton,
-                      a_c_Ham, a_c_Moms,
-                      a_c_Ham_abs_terms,
-                      a_c_Moms_abs_terms),
-    my_matter(a_matter)
-{
-}
-
-template <class matter_t>
 template <class data_t>
 void InflationDiagnostics<matter_t>::compute(Cell<data_t> current_cell) const
 {
     // Load local vars and calculate derivs
-    const auto vars = current_cell.template load_vars<InflationDiagnosticsVars>();
-    const auto d1 = this->m_deriv.template diff1<InflationDiagnosticsVars>(current_cell);
-    const auto d2 = this->m_deriv.template diff2<InflationDiagnosticsVars>(current_cell);
+    const auto vars = current_cell.template load_vars<Vars>();
+    const auto d1 = m_deriv.template diff1<Vars>(current_cell);
+    const auto d2 = m_deriv.template diff2<Vars>(current_cell);
 
     // Inverse metric and Christoffel symbol
     const auto h_UU = TensorAlgebra::compute_inverse_sym(vars.h);
@@ -39,25 +26,25 @@ void InflationDiagnostics<matter_t>::compute(Cell<data_t> current_cell) const
 
     // Define quantities
     data_t rho;
-    data_t sqrt_gam;
+    data_t sqrt_gamma;
     data_t S;
     data_t rho_scaled;
     data_t S_scaled;
     data_t K_scaled;
+    data_t a;
 
     // Energy Momentum Tensor
-    const auto emtensor = my_matter.compute_emtensor(vars, d1, h_UU, chris.ULL);
+    const auto emtensor = m_matter.compute_emtensor(vars, d1, h_UU, chris.ULL);
 
-    //from NewConstraint
-    sqrt_gam = pow(vars.chi, -3. / 2.);
-    K_scaled = vars.K / pow(vars.chi, 3. / 2.);
-    //from NewMatterConstraint
+    sqrt_gamma = pow(vars.chi, -3. / 2.);
     rho = emtensor.rho;
     S = emtensor.S;
+    K_scaled = vars.K / pow(vars.chi, 3. / 2.);
     rho_scaled = emtensor.rho / pow(vars.chi, 3. / 2.);
     S_scaled = emtensor.S / pow(vars.chi, 3. / 2.);
+
     //Write the constraints into the output FArrayBox
-    current_cell.store_vars(sqrt_gam, c_sqrt_gam);
+    current_cell.store_vars(sqrt_gamma, c_sqrt_gamma);
     current_cell.store_vars(rho, c_rho);
     current_cell.store_vars(rho_scaled, c_rho_scaled);
     current_cell.store_vars(S_scaled, c_S_scaled);

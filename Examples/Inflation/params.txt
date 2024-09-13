@@ -7,7 +7,7 @@
 verbosity = 0
 
 # location / naming of output files
-output_path = "/cosma/home/dp092/dc-waem3/cosma8data/GRChomboTest/Inflation" # Main path for all files. Must exist!
+# output_path = "" # Main path for all files. Must exist!
 chk_prefix = Inflation_
 plot_prefix = Inflationp_
 # restart_file = Inflation_000000.3d.hdf5
@@ -16,9 +16,9 @@ plot_prefix = Inflationp_
 checkpoint_interval = 500
 # set to 0 to turn off plot files (except at t=0 and t=stop_time)
 # set to -1 to never ever print plotfiles
-plot_interval = 1
-num_plot_vars = 3
-plot_vars = chi phi K
+plot_interval = 100
+num_plot_vars = 5
+plot_vars = chi phi rho_scaled S_scaled K_scaled
 
 # subpaths - specific directories for hdf5, pout, extraction data
 # (these are created at runtime)
@@ -44,13 +44,13 @@ print_progress_only_to_rank_0 = 1
 G_Newton = 1.
 
 # Scalar field initial data
-scalar_amplitude = 0.1
-scalar_width = 5.0
+scalar_amplitude = 0.0777635
+scalar_width = 1.0 # not use
 scalar_mass = 1.0
+scalar_field_mode = 1.0
 
-# Kerr BH data
-kerr_mass = 1.0
-kerr_spin = 0.0
+# lineout params
+lineout_num_points = 20
 
 #################################################
 # Grid parameters
@@ -63,7 +63,7 @@ kerr_spin = 0.0
 # 'N2' or 'N2_full' and 'N3' or 'N3_full' ( then dx_coarsest = L/N(max) )
 # NB - the N values need to be multiples of the block_factor
 N_full = 128
-L_full = 256
+L_full = 1
 
 # Maximum number of times you can regrid above coarsest level
 max_level = 0 # There are (max_level+1) grids, so min is zero
@@ -79,8 +79,8 @@ regrid_interval   = 0   0   0   0   0   0
 regrid_interval = 0 0 0 0 0 0
 
 # Max and min box sizes
-max_box_size = 16
-min_box_size = 16
+max_box_size = 8
+min_box_size = 8
 
 tag_buffer_size = 0 # this example uses a fixed grid
 
@@ -98,8 +98,8 @@ isPeriodic = 1 1 1
 # 0 = static, 1 = sommerfeld, 2 = reflective
 # 3 = extrapolating, 4 = mixed
 # (see BoundaryConditions.hpp for details)
-hi_boundary = 4 4 4
-lo_boundary = 2 2 2
+# hi_boundary = 4 4 4
+# lo_boundary = 2 2 2
 
 # if reflective boundaries selected, must set
 # parity of all vars (in order given by UserVariables.hpp)
@@ -129,7 +129,7 @@ extrapolating_vars = phi Pi
 # Evolution parameters
 
 # dt will be dx*dt_multiplier on each grid level
-dt_multiplier = 0.25
+dt_multiplier = 0.5
 stop_time = 100.0
 # max_steps = 4
 
@@ -158,8 +158,8 @@ covariantZ4 = 1 # 0: keep kappa1; 1 [default]: replace kappa1 -> kappa1/lapse
 # coefficient for KO numerical dissipation
 sigma = 0.3
 
-min_chi = 1.e-20
-min_lapse = 1.e-20
+min_chi = 1.e-50
+min_lapse = 1.e-50
 
 #################################################
 # Apparent Horizon Finder parameters

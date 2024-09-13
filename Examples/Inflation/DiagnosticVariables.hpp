@@ -10,13 +10,11 @@
 enum
 {
     c_Ham,
-
     c_Mom,
-
-    c_Ham_abs, // c_Ham_abs_sum
-    c_Mom_abs, // c_Mom_abs_sum
+    c_Ham_abs_sum, // c_Ham_abs_sum
+    c_Mom_abs_sum, // c_Mom_abs_sum
     c_rho,
-    c_sqrt_gam, // sqrt(gamma)=pow(chi,-3/2) volume factor of spatial metric
+    c_sqrt_gamma, // sqrt(gamma) = pow(chi,-3/2) volume factor of spatial metric
     c_rho_scaled,
     c_S_scaled,
     c_K_scaled,
@@ -31,7 +29,7 @@ static const std::array<std::string, NUM_DIAGNOSTIC_VARS> variable_names = {
 
     "Mom",
     
-    "Ham_abs", "Mom_abs", "rho", "sqrt_gam", "rho_scaled", "S_scaled", "K_scaled"};
+    "Ham_abs", "Mom_abs", "rho", "sqrt_gamma", "rho_scaled", "S_scaled", "K_scaled"};
 }
 
 #endif /* DIAGNOSTICVARIABLES_HPP */

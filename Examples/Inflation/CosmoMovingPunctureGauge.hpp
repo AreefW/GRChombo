@@ -3,8 +3,8 @@
  * Please refer to LICENSE in GRChombo's root directory.
  */
 
-#ifndef MODIFIEDMOVINGPUNCTUREGAUGE_HPP_
-#define MODIFIEDMOVINGPUNCTUREGAUGE_HPP_
+#ifndef COSMOMOVINGPUNCTUREGAUGE_HPP_
+#define COSMOMOVINGPUNCTUREGAUGE_HPP_
 
 #include "DimensionDefinitions.hpp"
 #include "Tensor.hpp"
@@ -18,7 +18,7 @@
  * f(lapse) = -c*lapse^(p-2)
  * and a Gamma-driver shift condition
  **/
-class ModifiedMovingPunctureGauge
+class CosmoMovingPunctureGauge
 {
   public:
     using params_t = MovingPunctureGauge::params_t;
@@ -47,7 +47,7 @@ class ModifiedMovingPunctureGauge
     double m_K_mean;
 
   public:
-    ModifiedMovingPunctureGauge(const params_t &a_params) : m_params(a_params) {}
+    CosmoMovingPunctureGauge(const params_t &a_params) : m_params(a_params) {}
 
     template <class data_t, template <typename> class vars_t,
               template <typename> class diff2_vars_t>
@@ -59,7 +59,7 @@ class ModifiedMovingPunctureGauge
         rhs.lapse = m_params.lapse_advec_coeff * advec.lapse -
                     m_params.lapse_coeff *
                         pow(vars.lapse, m_params.lapse_power) *
-                        (vars.K - m_K_mean - 2 * vars.Theta); //--- added - m_K_mean 
+                        (vars.K - m_K_mean - 2 * vars.Theta); // added "- m_K_mean"
 
         FOR(i)
         {
@@ -78,4 +78,4 @@ class ModifiedMovingPunctureGauge
 
 };
 
-#endif /* MODIFIEDMOVINGPUNCTUREGAUGE_HPP_ */
+#endif /* COSMOMOVINGPUNCTUREGAUGE_HPP_ */
