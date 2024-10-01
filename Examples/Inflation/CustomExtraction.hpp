@@ -70,11 +70,11 @@ class CustomExtraction
         std::vector<double> interp_z(m_num_points);
 
         // Work out the coordinates
-        // go out along x-axis from m_origin to L/2
+        // go out along x-axis from m_origin to L
         for (int idx = 0; idx < m_num_points; ++idx)
         {
             interp_x[idx] =
-                m_origin[0] + (double(idx) / double(m_num_points) * 0.5 * m_L);
+                m_origin[0] + (double(idx) / double(m_num_points) * m_L);
             interp_y[idx] = m_origin[1];
             interp_z[idx] = m_origin[2];
         }
@@ -85,7 +85,7 @@ class CustomExtraction
             .setCoords(1, interp_y.data())
             .setCoords(2, interp_z.data())
             .addComp(m_comp, interp_var_data.data(), Derivative::LOCAL,
-                     VariableType::diagnostic); // evolution or diagnostic
+                     VariableType::evolution); // evolution or diagnostic
 
         // submit the query
         a_interpolator->interp(query);

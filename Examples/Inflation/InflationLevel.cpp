@@ -18,7 +18,7 @@
 #include "NewMatterConstraints.hpp"
 
 // For tag cells
-#include "FixedGridsTaggingCriterion.hpp"
+#include "HamTaggingCriterion.hpp"
 
 // Problem specific includes
 #include "ComputePack.hpp"
@@ -67,14 +67,31 @@ void InflationLevel::initialData()
         m_state_new, m_state_new, INCLUDE_GHOST_CELLS);
 
     fillAllGhosts();
-    BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
-                   EXCLUDE_GHOST_CELLS);
+    // BoxLoops::loop(GammaCalculator(m_dx), m_state_new, m_state_new,
+    //               EXCLUDE_GHOST_CELLS);
 
-    // Set initial K = -sqrt(24 pi <rho>)
+    // Set initial K = -sqrt(24 pi G <rho>)
     Potential potential(m_p.potential_params, m_p.L, m_p.scalar_field_mode);
     ScalarFieldWithPotential scalar_field(potential);
     InitialK<ScalarFieldWithPotential> my_initial_K(scalar_field, m_dx, m_p.G_Newton);
     BoxLoops::loop(my_initial_K, m_state_new, m_state_new, EXCLUDE_GHOST_CELLS);
+    
+    // BoxLoops::loop(
+    //     MatterConstraints<ScalarFieldWithPotential>(
+    //         scalar_field, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom, c_Mom), c_Ham_abs_sum, Interval(c_Mom_abs_sum, c_Mom_abs_sum)),
+    //     m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    // InflationDiagnostics<ScalarFieldWithPotential> inflation_diagnostics(scalar_field, m_dx, m_p.G_Newton);
+    // BoxLoops::loop(inflation_diagnostics, m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    // int min_level = 0;
+    // if (true){
+    //     AMRReductions<VariableType::diagnostic> amr_reductions_diag(m_cosmo_amr);
+    //     double phys_vol = amr_reductions_diag.sum(c_sqrt_gamma);
+    //     double K_total = amr_reductions_diag.sum(c_K_scaled);
+    //     m_cosmo_amr.set_rho_mean(amr_reductions_diag.sum(c_rho_scaled) / phys_vol);
+    //     m_cosmo_amr.set_S_mean(amr_reductions_diag.sum(c_S_scaled) / phys_vol);
+    //     m_cosmo_amr.set_K_mean(K_total / phys_vol);
+    //     pout() << "Ini rho_mean = " << m_cosmo_amr.get_rho_mean() << endl;
+    // }
 }
 
 #ifdef CH_USE_HDF5
@@ -136,17 +153,35 @@ void InflationLevel::specificUpdateODE(GRLevelData &a_soln,
 
 void InflationLevel::preTagCells()
 {
-    // we don't need any ghosts filled for the fixed grids tagging criterion
-    // used here so don't fill any
+    // Pre tagging - fill ghost cells and calculate Ham terms
+    fillAllGhosts();
+    Potential potential(m_p.potential_params, m_p.L, m_p.scalar_field_mode);
+    ScalarFieldWithPotential scalar_field(potential);
+    BoxLoops::loop(
+        MatterConstraints<ScalarFieldWithPotential>(
+            scalar_field, m_dx, m_p.G_Newton, c_Ham, Interval(c_Mom, c_Mom), c_Ham_abs_sum, Interval(c_Mom_abs_sum, c_Mom_abs_sum)),
+        m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    InflationDiagnostics<ScalarFieldWithPotential> inflation_diagnostics(scalar_field, m_dx, m_p.G_Newton);
+    BoxLoops::loop(inflation_diagnostics, m_state_new, m_state_diagnostics, EXCLUDE_GHOST_CELLS);
+    // int min_level = 0;
+    // if (m_level == min_level){
+    //     AMRReductions<VariableType::diagnostic> amr_reductions_diag(m_cosmo_amr);
+    //     double phys_vol = amr_reductions_diag.sum(c_sqrt_gamma);
+    //     double K_total = amr_reductions_diag.sum(c_K_scaled);
+    //     m_cosmo_amr.set_rho_mean(amr_reductions_diag.sum(c_rho_scaled) / phys_vol);
+    //     m_cosmo_amr.set_S_mean(amr_reductions_diag.sum(c_S_scaled) / phys_vol);
+    //     m_cosmo_amr.set_K_mean(K_total / phys_vol);
+    // }
+    pout() << "Pretag rho_mean = " << m_cosmo_amr.get_rho_mean() << endl;
 }
 
 void InflationLevel::computeTaggingCriterion(
     FArrayBox &tagging_criterion, const FArrayBox &current_state,
     const FArrayBox &current_state_diagnostics)
 {
-    BoxLoops::loop(
-        FixedGridsTaggingCriterion(m_dx, m_level, 2.0 * m_p.L, m_p.center),
-        current_state, tagging_criterion);
+    pout() << "Tag rho_mean = " << m_cosmo_amr.get_rho_mean() << endl;
+    BoxLoops::loop(HamTaggingCriterion(m_dx, m_p.center_tag, m_p.rad, m_cosmo_amr.get_rho_mean()), current_state_diagnostics,
+        tagging_criterion);
 }
 void InflationLevel::specificPostTimeStep()
 {
@@ -211,8 +246,8 @@ void InflationLevel::specificPostTimeStep()
             interpolator.refresh();
 
             // set up the query and execute it
-            std::array<double, CH_SPACEDIM> extr_point = {0., 0., 0.}; // specified point
-            CustomExtraction extraction(c_rho, m_p.lineout_num_points, m_p.L, extr_point,
+            std::array<double, CH_SPACEDIM> extr_point = {0., m_p.L/2, m_p.L/2}; // specified point
+            CustomExtraction extraction(c_chi, m_p.lineout_num_points, m_p.L, extr_point,
                                        m_dt, m_time);
             extraction.execute_query(&interpolator,m_p.data_path+"lineout");
         
