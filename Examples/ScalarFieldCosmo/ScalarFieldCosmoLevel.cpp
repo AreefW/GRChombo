@@ -12,7 +12,7 @@
 #include "TraceARemoval.hpp"
 
 // For RHS update
-#include "MatterCCZ4RHS.hpp"
+#include "CosmoMatterCCZ4RHS.hpp"
 
 // For constraints calculation
 #include "NewMatterConstraints.hpp"
@@ -214,12 +214,10 @@ void CosmoLevel::specificEvalRHS(GRLevelData &a_soln, GRLevelData &a_rhs,
     // Calculate MatterCCZ4 right hand side with matter_t = ScalarField
     Potential potential(m_p.potential_params);
     ScalarFieldWithPotential scalar_field(potential);
-    CosmoMovingPunctureGauge cosmo_moving_puncture_gauge(m_p.ccz4_params);
-    cosmo_moving_puncture_gauge.set_K_mean(m_cosmo_amr.get_K_mean());
-    MatterCCZ4RHS<ScalarFieldWithPotential, CosmoMovingPunctureGauge,
-                  FourthOrderDerivatives>
+    CosmoMatterCCZ4RHS<ScalarFieldWithPotential, FourthOrderDerivatives>
         my_ccz4_matter(scalar_field, m_p.ccz4_params, m_dx, m_p.sigma,
                        m_p.formulation, m_p.G_Newton);
+    my_ccz4_matter.set_K_mean(m_cosmo_amr.get_K_mean());
     BoxLoops::loop(my_ccz4_matter, a_soln, a_rhs, EXCLUDE_GHOST_CELLS);
 }
 
